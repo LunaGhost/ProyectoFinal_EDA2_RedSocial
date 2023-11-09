@@ -112,6 +112,7 @@ void iniciar(){
         printf("Elija una opción: ");
         scanf("%d", &choice);
 
+        User *stored_user;
         switch (choice) {
             case 1:
                 printf("\n=== Iniciar sesión ===\n");
@@ -120,12 +121,13 @@ void iniciar(){
                 printf("Contraseña: ");
                 scanf("%s", password);
 
-                User *stored_user = find_user(username);
+                stored_user = find_user(username);
                 if (stored_user != NULL && verify_password(stored_user, password)) {
                     int loggedIn = 1; // Bandera para rastrear el estado de inicio de sesión
                     while (loggedIn) {
                         system("cls");
 
+                        cuenta_abierta:
                         mostrar_perfil(stored_user);
                         printf("\n1. Cerrar sesión\n2. Salir\n");
                         printf("Elija una opción: ");
@@ -157,6 +159,10 @@ void iniciar(){
                 if (find_user(username) == NULL) {
                     insert_user(username, password);
                     printf("Cuenta creada con éxito para %s.\n", username);
+                    Sleep(100);
+                    system("cls");
+                    stored_user = find_user(username);
+                    goto cuenta_abierta;
                 } else {
                     printf("El usuario ya existe. Intente con un nombre de usuario diferente.\n");
                 }
@@ -174,7 +180,7 @@ void iniciar(){
 //==== MAIN ====//
 int main() {
     setlocale(LC_ALL, ""); // Configura la localización para soporte de caracteres especiales
-    desplegar_pantalla_carga();
+    //desplegar_pantalla_carga();
 
     iniciar();
 
