@@ -2,15 +2,44 @@
 #include <stdlib.h>
 #include <string.h>
 #include <locale.h> // Incluye la biblioteca para soporte de caracteres especiales
-
+#define MAX_MESSAGES 100
+#define MAX_MESSAGE_LENGTH 256
+#define MAX_USERNAME_LENGTH 30
 //== ESTRUCTURAS ==//
 
 // Estructura de usuario
 typedef struct User {
     char username[50];
-    char password_hash[64]; // Hash de contraseÒa (SHA-256)
+    char password_hash[64]; // Hash de contrase√±a (SHA-256)
     struct User* next;
 } User;
+
+typedef struct MensajesChat {
+    char usuario[MAX_USERNAME_LENGTH];
+    char mensaje[MAX_MESSAGE_LENGTH];
+} MensajesChat;
+
+typedef struct HistorialChat {
+    MensajesChat messages[MAX_MESSAGES];
+    int count;
+} HistorialChat;
+
+void ImprimirHistorial(HistorialChat *historial ) {
+    for (int i = 0; i < historial ->count; i++) {
+        printf("%s: %s\n", historial ->messages[i].usuario, historial ->messages[i].mensaje);
+    }
+}
+
+void anadirMensaje(HistorialChat *historial , const char *usuario, const char *mensaje) {
+    if (historial ->count < MAX_MESSAGES) {
+        strcpy(historial ->messages[historial ->count].usuario, usuario);
+        strcpy(historial ->messages[historial ->count].mensaje, mensaje);
+        historial ->count++;
+    } else {
+        printf("El historial del chat esta lleno. No se pueden a√±adir mas mensajes.\n");
+    }
+}
+
 
 // Estructura de la tabla hash
 #define TABLE_SIZE 100
@@ -18,7 +47,7 @@ User* hashTable[TABLE_SIZE];
 
 //==== FUNCIONES LOGICAS ====//
 
-// FunciÛn para calcular el Ìndice en la tabla hash
+// Funci√≥n para calcular el √≠ndice en la tabla hash
 int hash(char *str) {
     int hash = 0;
     int c;
@@ -28,7 +57,7 @@ int hash(char *str) {
     return hash % TABLE_SIZE;
 }
 
-// FunciÛn para agregar un usuario a la tabla hash
+// Funci√≥n para agregar un usuario a la tabla hash
 void insert_user(char *username, char *password) {
     int index = hash(username);
     User* new_user = (User*)malloc(sizeof(User));
@@ -42,7 +71,7 @@ void insert_user(char *username, char *password) {
     hashTable[index] = new_user;
 }
 
-// FunciÛn para buscar un usuario en la tabla hash y devolver un puntero al usuario encontrado
+// Funci√≥n para buscar un usuario en la tabla hash y devolver un puntero al usuario encontrado
 User* find_user(char *username) {
     int index = hash(username);
     User* current = hashTable[index];
@@ -55,9 +84,9 @@ User* find_user(char *username) {
     return NULL;
 }
 
-// FunciÛn para verificar la contraseÒa de un usuario
+// Funci√≥n para verificar la contrase√±a de un usuario
 int verify_password(User *user, char *password) {
-    // En un entorno de producciÛn, deberÌas utilizar una funciÛn de hash segura aquÌ
+    // En un entorno de producci√≥n, deber√≠as utilizar una funci√≥n de hash segura aqu√≠
     return strcmp(user->password_hash, password) == 0;
 }
 
@@ -87,16 +116,57 @@ void desplegar_pantalla_carga(){
 
 void mostrar_menu() {
     printf("\n===  BIENVENIDO  ===\n");
-    printf("1. Iniciar sesiÛn\n");
+    printf("1. Iniciar sesi√≥n\n");
     printf("2. Crear cuenta\n");
     printf("3. Salir\n");
     printf("====================\n");
 }
 
-// FunciÛn para mostrar el perfil de un usuario
+// Funci√≥n para mostrar el perfil de un usuario
 void mostrar_perfil(User *user) {
     printf("=== Perfil de %s ===\n", user->username);
 }
+
+void chat(User *stored_user) {
+    HistorialChat historial;
+    historial.count = 0;
+
+    char usuario[MAX_USERNAME_LENGTH];
+
+    printf("Introduce tu usuario: ");
+    getchar(); // Limpiar b√∫fer del teclado
+    fgets(usuario, MAX_USERNAME_LENGTH, stdin);
+    usuario[strcspn(usuario, "\n")] = '\0'; // Eliminar el car√°cter de nueva l√≠nea
+
+    printf("Bienvenido al chat, %s!\n", usuario);
+
+    while (1) {
+        char mensaje[MAX_MESSAGE_LENGTH];
+
+        printf("Introduce tu mensaje (escribe 'salir' para terminar el chat): ");
+        fgets(mensaje, MAX_MESSAGE_LENGTH, stdin);
+        mensaje[strcspn(mensaje, "\n")] = '\0'; // Eliminar el car√°cter de nueva l√≠nea
+
+        if (strcmp(mensaje, "salir") == 0) {
+            break;
+        }
+
+        anadirMensaje(&historial, usuario, mensaje);
+
+        printf("\nHistorial de Chat:\n");
+        ImprimirHistorial(&historial);
+        printf("\n");
+    }
+
+    printf("Saliendo del Chat. Adi√≥s, %s!\n", usuario);
+}
+
+// Funci√≥n para manejar la opci√≥n de chat
+void manejar_opcion_chat(User *stored_user) {
+    chat(stored_user);
+}
+
+
 
 void iniciar(){
     char username[50];
@@ -105,60 +175,63 @@ void iniciar(){
 
     while (1) {
         printf("\n=== BIENVENIDO ===\n");
-        printf("1. Iniciar sesiÛn\n");
+        printf("1. Iniciar sesi√≥n\n");
         printf("2. Crear cuenta\n");
         printf("3. Salir\n");
         printf("====================\n");
-        printf("Elija una opciÛn: ");
+        printf("Elija una opci√≥n: ");
         scanf("%d", &choice);
 
         User *stored_user;
         switch (choice) {
             case 1:
-                printf("\n=== Iniciar sesiÛn ===\n");
+                printf("\n=== Iniciar sesi√≥n ===\n");
                 printf("Usuario: ");
                 scanf("%s", username);
-                printf("ContraseÒa: ");
+                printf("Contrase√±a: ");
                 scanf("%s", password);
 
                 stored_user = find_user(username);
                 if (stored_user != NULL && verify_password(stored_user, password)) {
-                    int loggedIn = 1; // Bandera para rastrear el estado de inicio de sesiÛn
+                    int loggedIn = 1; // Bandera para rastrear el estado de inicio de sesi√≥n
                     while (loggedIn) {
                         system("cls");
 
                         cuenta_abierta:
                         mostrar_perfil(stored_user);
-                        printf("\n1. Cerrar sesiÛn\n2. Salir\n");
-                        printf("Elija una opciÛn: ");
+                        printf("\n1. Cerrar sesi√≥n\n2. Salir\n3. Chat\n");
+                        printf("Elija una opci√≥n: ");
                         scanf("%d", &choice);
 
                         switch (choice) {
                             case 1:
-                                loggedIn = 0; // Cerrar la sesiÛn
+                                loggedIn = 0; // Cerrar la sesi√≥n
                                 system("cls");
                                 break;
                             case 2:
-                                printf("Gracias por usar nuestra aplicaciÛn. °Hasta pronto!\n");
+                                printf("Gracias por usar nuestra aplicaci√≥n. ¬°Hasta pronto!\n");
                                 return 0;
+                            case 3:
+                                manejar_opcion_chat(stored_user);
+                                break;
                             default:
-                                printf("OpciÛn no v·lida. Por favor, elija una opciÛn v·lida.\n");
+                                printf("Opci√≥n no v√°lida. Por favor, elija una opci√≥n v√°lida.\n");
                         }
                     }
                 } else {
-                    printf("Usuario o contraseÒa incorrectos.\n");
+                    printf("Usuario o contrase√±a incorrectos.\n");
                 }
                 break;
             case 2:
                 printf("\n=== Crear cuenta ===\n");
                 printf("Nuevo usuario: ");
                 scanf("%s", username);
-                printf("Nueva contraseÒa: ");
+                printf("Nueva contrase√±a: ");
                 scanf("%s", password);
 
                 if (find_user(username) == NULL) {
                     insert_user(username, password);
-                    printf("Cuenta creada con Èxito para %s.\n", username);
+                    printf("Cuenta creada con √©xito para %s.\n", username);
                     Sleep(100);
                     system("cls");
                     stored_user = find_user(username);
@@ -168,10 +241,10 @@ void iniciar(){
                 }
                 break;
             case 3:
-                printf("Gracias por usar nuestra aplicaciÛn. °Hasta pronto!\n");
+                printf("Gracias por usar nuestra aplicaci√≥n. ¬°Hasta pronto!\n");
                 return 0;
             default:
-                printf("OpciÛn no v·lida. Por favor, elija una opciÛn v·lida.\n");
+                printf("Opci√≥n no v√°lida. Por favor, elija una opci√≥n v√°lida.\n");
                 break;
         }
     }
@@ -179,7 +252,7 @@ void iniciar(){
 
 //==== MAIN ====//
 int main() {
-    setlocale(LC_ALL, ""); // Configura la localizaciÛn para soporte de caracteres especiales
+    setlocale(LC_ALL, ""); // Configura la localizaci√≥n para soporte de caracteres especiales
     //desplegar_pantalla_carga();
 
     iniciar();
