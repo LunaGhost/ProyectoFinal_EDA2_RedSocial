@@ -2,17 +2,29 @@
 #include <stdlib.h>
 #include <string.h>
 #include <locale.h> // Incluye la biblioteca para soporte de caracteres especiales
+#include <assert.h>
+#include <stdbool.h>
+#include <stdint.h>
+
+#include "Publicaciones.h"
+
 #define MAX_MESSAGES 100
 #define MAX_MESSAGE_LENGTH 256
 #define MAX_USERNAME_LENGTH 30
-//== ESTRUCTURAS ==//
 
-// Estructura de usuario
-typedef struct User {
-    char username[50];
-    char password_hash[64]; // Hash de contraseña (SHA-256)
-    struct User* next;
-} User;
+
+#ifndef DBG_HELP
+#define DBG_HELP 0
+#endif
+
+#if DBG_HELP > 0
+#define DBG_PRINT( ... ) do{ fprintf( stderr, "DBG:" __VA_ARGS__ ); } while( 0 )
+#else
+#define DBG_PRINT( ... ) ;
+#endif
+
+
+//== ESTRUCTURAS ==//
 
 typedef struct MensajesChat {
     char usuario[MAX_USERNAME_LENGTH];
@@ -45,6 +57,8 @@ void anadirMensaje(HistorialChat *historial , const char *usuario, const char *m
 #define TABLE_SIZE 100
 User* hashTable[TABLE_SIZE];
 
+Graph* grafo;
+
 //==== FUNCIONES LOGICAS ====//
 
 // Función para calcular el índice en la tabla hash
@@ -58,7 +72,7 @@ int hash(char *str) {
 }
 
 // Función para agregar un usuario a la tabla hash
-void insert_user(char *username, char *password) {
+void insert_user(char *username, char *password, Graph* g) {
     int index = hash(username);
     User* new_user = (User*)malloc(sizeof(User));
     if (new_user == NULL) {
@@ -69,6 +83,7 @@ void insert_user(char *username, char *password) {
     strncpy(new_user->password_hash, password, sizeof(new_user->password_hash));
     new_user->next = hashTable[index];
     hashTable[index] = new_user;
+    Insert_User_Graph(username, g);
 }
 
 // Función para buscar un usuario en la tabla hash y devolver un puntero al usuario encontrado
@@ -98,19 +113,19 @@ void desplegar_pantalla_carga(){
     for (i = 0; i < 100; i++) {
         printf("\rCargando... [%c] %d%%", loading[i % 4], i + 1);
         fflush(stdout);
-        Sleep(75);
+        system("sleep 0.75");
     }
     printf("\nCarga completa!");
 
     // Espera 1 segundos antes de borrar la pantalla
-    Sleep(1000);
+    system("sleep 1");
     system("cls");
 
     printf(" _\n|_) o  _ __    _ __  o  _| _\n|_) | (/_| |\_/(/_| | | (_|(_)");
     printf("\n\n             _\n            (_|\n\n");
     printf("nombre red social");
 
-    Sleep(2000);
+    system("sleep 2");
     system("cls");
 }
 
@@ -166,73 +181,108 @@ void manejar_opcion_chat(User *stored_user) {
     chat(stored_user);
 }
 
-
-
-void iniciar(){
+int iniciar(){
     char username[50];
     char password[50];
     int choice;
 
     while (1) {
         printf("\n=== BIENVENIDO ===\n");
-        printf("1. Iniciar sesión\n");
+        printf("1. Iniciar sesi�n\n");
         printf("2. Crear cuenta\n");
         printf("3. Salir\n");
         printf("====================\n");
-        printf("Elija una opción: ");
+        printf("Elija una opci�n: ");
         scanf("%d", &choice);
-
+        limpiarBuffer();
         User *stored_user;
         switch (choice) {
             case 1:
-                printf("\n=== Iniciar sesión ===\n");
+                printf("\n=== Iniciar sesi�n ===\n");
                 printf("Usuario: ");
                 scanf("%s", username);
-                printf("Contraseña: ");
+                printf("Contrase�a: ");
                 scanf("%s", password);
-
+                limpiarBuffer();
                 stored_user = find_user(username);
                 if (stored_user != NULL && verify_password(stored_user, password)) {
-                    int loggedIn = 1; // Bandera para rastrear el estado de inicio de sesión
+                    int loggedIn = 1; // Bandera para rastrear el estado de inicio de sesi�n
                     while (loggedIn) {
                         system("cls");
 
                         cuenta_abierta:
                         mostrar_perfil(stored_user);
-                        printf("\n1. Cerrar sesión\n2. Salir\n3. Chat\n");
-                        printf("Elija una opción: ");
+                        printf("\n1. Realizar publicacion\n2. Ver publicaciones de feed\n3. Ver perfil personal\n4. Ver solicitudes de amistad\n5.Agregar amigo\n6. Cerrar sesi�n\n7.Salir");
+                        printf("Elija una opci�n: ");
                         scanf("%d", &choice);
-
                         switch (choice) {
                             case 1:
-                                loggedIn = 0; // Cerrar la sesión
+                                //Publicar
+                                Realizar_Publicacion(stored_user);
+                                //goto cuenta_abierta;
                                 system("cls");
                                 break;
                             case 2:
-                                printf("Gracias por usar nuestra aplicación. ¡Hasta pronto!\n");
-                                return 0;
-                            case 3:
-                                manejar_opcion_chat(stored_user);
+                                //Ver publicacione
+                                //Revisar_feed();
+                                //aumentara likescoment, compart
+                                system("cls");
                                 break;
+                            case 3:
+                                //Ver perfil propio
+                                mostrar_perfil(stored_user);
+                                Mostrar_Publicaciones(stored_user);
+                                //goto cuenta_abierta;
+                                system("cls");
+                                break;
+                            case 4:
+                                //Agregar amigo
+                                //MostrarSolicitudesAmistad(stored_user,grafo);
+                                system("cls");
+                                break;
+                            case 5:
+                                /*Se envia solicitud de amistad
+                                printf("Ingrese el nombre de usuario al que desea enviar una solicitud de amistad: ");
+                                char friend_username[50];
+                                scanf("%s", friend_username);
+                                User* friend_user = find_user(friend_username);
+                                if (friend_user != NULL) {
+                                    SendFriendRequest(stored_user, friend_user, grafo);
+                                    // Aquí puedes mostrar un mensaje de confirmación
+                                } else {
+                                    printf("Usuario no encontrado.\n");
+                                    // Aquí puedes mostrar un mensaje de error
+                                }*/
+                                system("cls");
+                                break;
+                            case 6:
+                                //Cerrar sesion
+                                loggedIn = 0;
+                                system("cls");
+                                break;
+                            case 7:
+                                //Salir de la aplicacion
+                                printf("Gracias por usar nuestra aplicaci�n. �Hasta pronto!\n");
+                                return 0;
                             default:
-                                printf("Opción no válida. Por favor, elija una opción válida.\n");
+                                printf("Opci�n no v�lida. Por favor, elija una opci�n v�lida.\n");
                         }
                     }
                 } else {
-                    printf("Usuario o contraseña incorrectos.\n");
+                    printf("Usuario o contrase�a incorrectos.\n");
                 }
                 break;
             case 2:
                 printf("\n=== Crear cuenta ===\n");
                 printf("Nuevo usuario: ");
                 scanf("%s", username);
-                printf("Nueva contraseña: ");
+                printf("Nueva contrase�a: ");
                 scanf("%s", password);
 
                 if (find_user(username) == NULL) {
-                    insert_user(username, password);
-                    printf("Cuenta creada con éxito para %s.\n", username);
-                    Sleep(100);
+                    insert_user(username, password, grafo);
+                    printf("Cuenta creada con Exito para %s.\n", username);
+                    system("sleep 0.1");
                     system("cls");
                     stored_user = find_user(username);
                     goto cuenta_abierta;
@@ -241,10 +291,10 @@ void iniciar(){
                 }
                 break;
             case 3:
-                printf("Gracias por usar nuestra aplicación. ¡Hasta pronto!\n");
+                printf("Gracias por usar nuestra aplicaci�n. �Hasta pronto!\n");
                 return 0;
             default:
-                printf("Opción no válida. Por favor, elija una opción válida.\n");
+                printf("Opci�n no v�lida. Por favor, elija una opci�n v�lida.\n");
                 break;
         }
     }
@@ -255,7 +305,9 @@ int main() {
     setlocale(LC_ALL, ""); // Configura la localización para soporte de caracteres especiales
     //desplegar_pantalla_carga();
 
+    grafo = Graph_New(TABLE_SIZE, eGraphType_UNDIRECTED);
     iniciar();
+    Graph_Delete(&grafo);
 
     return 0;
 }
