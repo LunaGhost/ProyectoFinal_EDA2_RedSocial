@@ -212,8 +212,9 @@ int iniciar(){
 
                         cuenta_abierta:
                         mostrar_perfil(stored_user);
-                        printf("\n1. Realizar publicacion\n2. Ver publicaciones de feed\n3. Ver perfil personal\n4. Ver solicitudes de amistad\n5.Agregar amigo\n6. Cerrar sesi�n\n7.Salir");
+                        printf("\n1. Realizar publicacion\n2. Ver publicaciones de feed\n3. Ver perfil personal\n4. Ver solicitudes de amistad\n5.Agregar amigo\n6. Chat\n7. Cerrar sesi�n\n8.Salir");
                         printf("Elija una opci�n: ");
+                        
                         scanf("%d", &choice);
                         switch (choice) {
                             case 1:
@@ -256,11 +257,16 @@ int iniciar(){
                                 system("cls");
                                 break;
                             case 6:
+                                //Chat
+                                manejar_opcion_chat(stored_user);
+                                system("cls");
+                                break;
+                            case 7:
                                 //Cerrar sesion
                                 loggedIn = 0;
                                 system("cls");
                                 break;
-                            case 7:
+                            case 8:
                                 //Salir de la aplicacion
                                 printf("Gracias por usar nuestra aplicaci�n. �Hasta pronto!\n");
                                 return 0;
