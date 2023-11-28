@@ -250,10 +250,8 @@ int iniciar(){
                                 User* friend_user = find_user(friend_username);
                                 if (friend_user != NULL) {
                                     SendFriendRequest(stored_user, friend_user, grafo);
-                                    // Aquí puedes mostrar un mensaje de confirmación
                                 } else {
                                     printf("Usuario no encontrado.\n");
-                                    // Aquí puedes mostrar un mensaje de error
                                 }*/
                                 system("cls");
                                 break;
