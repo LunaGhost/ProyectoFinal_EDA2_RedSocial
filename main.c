@@ -139,7 +139,7 @@ void mostrar_menu() {
 
 // Función para mostrar el perfil de un usuario
 void mostrar_perfil(User *user) {
-    printf("\n\n=== Perfil de %s ===\n", user->username);
+    printf("\n\n===== Perfil de %s =====\n", user->username);
 }
 
 void chat(User *stored_user) {
@@ -198,24 +198,30 @@ int iniciar(){
         User *stored_user;
         switch (choice) {
             case 1:
-                /*cuenta_abierta:*/
-                cuenta_abierta:
+                printf("\n=== Iniciar sesi�n ===\n");
+                printf("Usuario: ");
+                scanf("%s", username);
+                printf("Contrase�a: ");
+                scanf("%s", password);
+                limpiarBuffer();
                 stored_user = find_user(username);
                 if (stored_user != NULL && verify_password(stored_user, password)) {
-                    int loggedIn = 1; // Bandera para rastrear el estado de inicio de sesi�n
+                    int loggedIn = 1;
                     while (loggedIn) {
                         system("cls");
-
                         
                         mostrar_perfil(stored_user);
-                        printf("\n1. Realizar publicacion\n2. Ver publicaciones de feed\n3. Ver perfil personal\n4. Ver solicitudes de amistad\n5.Agregar amigo\n6. Chat\n7. Cerrar sesi�n\n8.Salir");
-                        printf("Elija una opci�n: ");
+                        printf("\n1. Realizar publicación\n2. Ver publicaciones de feed\n3. Ver perfil personal\n");
+                        printf("4. Ver solicitudes de amistad\n5. Agregar amigo\n6. Chat\n7. Cerrar sesión\n8. Salir\n");
+                        printf("Elija una opción: ");
                         
                         scanf("%d", &choice);
+                        limpiarBuffer();
                         switch (choice) {
                             case 1:
                                 //Publicar
                                 Realizar_Publicacion(stored_user);
+                                //goto cuenta_abierta;
                                 system("cls");
                                 break;
                             case 2:
@@ -228,6 +234,7 @@ int iniciar(){
                                 //Ver perfil propio
                                 mostrar_perfil(stored_user);
                                 Mostrar_Publicaciones(stored_user);
+                                //goto cuenta_abierta;
                                 system("cls");
                                 break;
                             case 4:
@@ -276,16 +283,13 @@ int iniciar(){
                 printf("\n=== Crear cuenta ===\n");
                 printf("Nuevo usuario: ");
                 scanf("%s", username);
-                printf("Nueva contrase�a: ");
+                printf("Nueva contraseña: ");
                 scanf("%s", password);
 
                 if (find_user(username) == NULL) {
                     insert_user(username, password, grafo);
-                    printf("Cuenta creada con Exito para %s.\n", username);
-                    system("sleep 0.1");
-                    system("cls");
-                    stored_user = find_user(username);
-                    goto cuenta_abierta;
+                    printf("Cuenta creada con Éxito para %s.\n", username);
+                    printf("Vuelva a iniciar sesion para terminar");
                 } else {
                     printf("El usuario ya existe. Intente con un nombre de usuario diferente.\n");
                 }
