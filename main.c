@@ -139,7 +139,7 @@ void mostrar_menu() {
 
 // Función para mostrar el perfil de un usuario
 void mostrar_perfil(User *user) {
-    printf("=== Perfil de %s ===\n", user->username);
+    printf("\n\n=== Perfil de %s ===\n", user->username);
 }
 
 void chat(User *stored_user) {
@@ -198,19 +198,15 @@ int iniciar(){
         User *stored_user;
         switch (choice) {
             case 1:
-                printf("\n=== Iniciar sesi�n ===\n");
-                printf("Usuario: ");
-                scanf("%s", username);
-                printf("Contrase�a: ");
-                scanf("%s", password);
-                limpiarBuffer();
+                /*cuenta_abierta:*/
+                cuenta_abierta:
                 stored_user = find_user(username);
                 if (stored_user != NULL && verify_password(stored_user, password)) {
                     int loggedIn = 1; // Bandera para rastrear el estado de inicio de sesi�n
                     while (loggedIn) {
                         system("cls");
 
-                        cuenta_abierta:
+                        
                         mostrar_perfil(stored_user);
                         printf("\n1. Realizar publicacion\n2. Ver publicaciones de feed\n3. Ver perfil personal\n4. Ver solicitudes de amistad\n5.Agregar amigo\n6. Chat\n7. Cerrar sesi�n\n8.Salir");
                         printf("Elija una opci�n: ");
@@ -220,7 +216,6 @@ int iniciar(){
                             case 1:
                                 //Publicar
                                 Realizar_Publicacion(stored_user);
-                                //goto cuenta_abierta;
                                 system("cls");
                                 break;
                             case 2:
@@ -233,7 +228,6 @@ int iniciar(){
                                 //Ver perfil propio
                                 mostrar_perfil(stored_user);
                                 Mostrar_Publicaciones(stored_user);
-                                //goto cuenta_abierta;
                                 system("cls");
                                 break;
                             case 4:
