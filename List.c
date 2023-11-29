@@ -69,9 +69,6 @@ void List_Push_back( List* list, int data, float weight )
    }
 }
 
-
-
-
 void List_Push_back_post( List* list, Post* post){
     assert(list);
 
@@ -86,11 +83,12 @@ void List_Push_back_post( List* list, Post* post){
       list->first = list->last = list->cursor = n;
    }
 }
+
 void List_Pop_back( List* list )
 {
    assert( list );
    assert( list->first );
-   // ERR: no podemos borrar nada de una lista vacía
+   // ERR: no podemos borrar nada de una lista vacï¿½a
 
    if( list->last != list->first )
    {
@@ -108,7 +106,6 @@ void List_Pop_back( List* list )
 }
 
 
-
 bool List_Is_empty( List* list )
 {
    //assert( list );
@@ -116,15 +113,6 @@ bool List_Is_empty( List* list )
    return !list->first;
 }
 
-/**
- * @brief Busca la primer ocurrencia con la llave key y si la encuentra coloca ahí al cursor.
- *
- * @param list Referencia a una lista.
- * @param key La llave de búsqueda.
- *
- * @return true si encontró el elemento; false en caso contrario.
- * @post Si hubo una ocurrencia el cursor es movido a esa posición; en caso contrario el cursor no se mueve.
- */
 bool List_Find( List* list, int key )
 {
    assert( list );
@@ -143,10 +131,43 @@ bool List_Find( List* list, int key )
    return false;
 }
 
-bool List_Remove( List* list, int key )
-{
-   // terminar
-   return false;
+//Funcion completada
+bool List_Remove(List* list, int key) {
+    assert(list);
+
+    Node* current = list->first;
+
+    //La lista estÃ¡ vacÃ­a
+    if (!current) {
+        return false;
+    }
+
+    // Elemento al principio de la lista
+    if (current->data.index == key) {
+        list->first = current->next;
+        if (list->last == current) {
+            // Actualizar el puntero al Ãºltimo nodo si es necesario
+            list->last = current->next;
+        }
+        free(current);
+        return true;
+    }
+
+    // Caso general
+    while (current->next) {
+        if (current->next->data.index == key) {
+            Node* temp = current->next;
+            current->next = temp->next;
+            if (temp == list->last) {
+                list->last = current;
+            }
+            free(temp);
+            return true;
+        }
+        current = current->next;
+    }
+
+    return false;
 }
 
 void List_Cursor_front( List* list )
@@ -156,27 +177,12 @@ void List_Cursor_front( List* list )
    list->cursor = list->first;
 }
 
-void List_Cursor_back( List* list )
-{
-   assert( list );
-
-   list->cursor = list->last;
-}
-
 bool List_Cursor_next( List* list )
 {
    assert( list );
 
    list->cursor = list->cursor->next;
    return list->cursor;
-}
-
-bool List_Cursor_prev( List* list )
-{
-   assert( list );
-
-   // terminar
-   return false;
 }
 
 bool List_Cursor_end( List* list )
@@ -193,36 +199,3 @@ Data  List_Cursor_get( List* list )
 
    return list->cursor->data;
 }
-
-/**
- * @brief Elimina el elemento apuntado por el cursor.
- *
- * @param list Referencia a una lista.
- *
- * @pre El cursor debe apuntar a una posición válida.
- * @post El cursor queda apuntando al elemento a la derecha del elemento eliminado; si
- * este hubiese sido el último, entonces el cursor apunta al primer elemento de la lista.
- */
-void List_Cursor_erase( List* list );
-
-
-/**
- * @brief Aplica la función fn() a cada elemento de la lista. La función fn() es una función unaria.
- *
- * @param list Una lista.
- * @param fn Función unaria que será aplicada a cada elemento de la lista.
- */
-void List_For_each( List* list, void (*fn)( int, float ) )
-{
-   Node* it = list->first;
-   // |it| es la abreviación de "iterator", o  en español, "iterador"
-
-   while( it != NULL )
-   {
-      fn( it->data.index, it->data.weight );
-
-      it = it->next;
-   }
-}
-
-
