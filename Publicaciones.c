@@ -13,13 +13,12 @@
 #endif
 
 //                  FUNCIONES DEL GRAFO                  //
-
 User* find_user(char *username);
-static int find( User usuarios[], int size, int userid )
+static int find( User users[], int size, int userid )
 {
    for( int i = 0; i < size; ++i )
    {
-      if( usuarios[ i ].graph_index == userid ) return i;
+      if( users[ i ].graph_index == userid ) return i;
    }
 
    return -1;
@@ -82,6 +81,9 @@ void Graph_Delete( Graph** g )
    *g = NULL;
 }
 
+
+
+
 static void insert( User* user, int index, float weigth )
 {
    // crear la lista si no existe!
@@ -106,7 +108,7 @@ void Graph_Print( Graph* g, int depth )
    {
       User* user = &g->users[ i ];
 
-      printf( "[%d]User%d=> Friend ", i, user->graph_index );
+      printf( "[%d]User%d- %s=> Friend ", i, user->graph_index, user->username );
       if( user->friends )
       {
          for( List_Cursor_front( user->friends );
@@ -127,7 +129,8 @@ void Graph_Print( Graph* g, int depth )
 }
 
 
-void Insert_User_Graph(char *username, Graph* g){
+void Insert_User_Graph(char *username, Graph* g)
+{
     assert(g->len < g->size);
 
     User* new_user = &g->users[g->len];
@@ -144,14 +147,14 @@ bool Graph_AddFriendship( Graph* g, int userstart, int userfinish )
 {
    assert( g->len > 0 );
 
-   // obtenemos los índices correspondientes:
+   // obtenemos los Indices correspondientes:
    int index_start = find( g->users, g->size, userstart );
    int index_finish = find( g->users, g->size, userfinish );
 
    DBG_PRINT( "AddEdge(): from:%d (with index:%d), to:%d (with index:%d)\n", start, start_idx, finish, finish_idx );
 
    if( index_start == -1 || index_finish == -1 ) return false;
-   // uno o ambos vértices no existen
+   // uno o ambos vetices no existen
 
    //Dadas las condiciones de amistad, el grafo ya es UNDIRECTED
    insert( &g->users[ index_start ], index_finish, 0.0 );
@@ -166,7 +169,7 @@ bool Graph_AddFriendship( Graph* g, int userstart, int userfinish )
 
 
 //                 FUNCIONES DE CREACION DE JSON                   //
-void create_json_user(User* user) {
+void Create_Json_User(User* user) {
     if (!user->post || List_Is_empty(user->post)) {
         printf("No hay publicaciones para el usuario %s.\n", user->username);
         return;
@@ -186,16 +189,16 @@ void create_json_user(User* user) {
     fprintf(json_output, "  \"publicaciones\": [\n");
 
     for (List_Cursor_front(user->post); !List_Cursor_end(user->post); ) {
-        Data data_publicacion = List_Cursor_get(user->post);
-        Post* publicacion = &data_publicacion.post;
+        Data Data_publication = List_Cursor_get(user->post);
+        Post* publication = &Data_publication.post;
 
         fprintf(json_output, "    {\n");
-        fprintf(json_output, "      \"content\": \"%s\",\n", publicacion->content);
-        fprintf(json_output, "      \"likes\": %d,\n", publicacion->likes);
-        fprintf(json_output, "      \"shares\": %d,\n", publicacion->shares);
-        fprintf(json_output, "      \"num_comments\": %d,\n", publicacion->num_comments);
-        fprintf(json_output, "      \"date\": \"%s\"\n", publicacion->date);
-        fprintf(json_output, "      \"hour\": \"%s\"\n", publicacion->hour);
+        fprintf(json_output, "      \"content\": \"%s\",\n", publication->content);
+        fprintf(json_output, "      \"likes\": %d,\n", publication->likes);
+        fprintf(json_output, "      \"shares\": %d,\n", publication->shares);
+        fprintf(json_output, "      \"num_comments\": %d,\n", publication->num_comments);
+        fprintf(json_output, "      \"date\": \"%s\"\n", publication->date);
+        fprintf(json_output, "      \"hour\": \"%s\"\n", publication->hour);
         fprintf(json_output, "    }%s\n", List_Cursor_next(user->post) ? "," : "");
     }
 
@@ -204,11 +207,11 @@ void create_json_user(User* user) {
 
     fclose(json_output);
 
-    printf("Archivo %s creado con éxito.\n", file_name);
+    printf("Archivo %s creado con �xito.\n", file_name);
 }
 
 
-void leer_json_post(char* file_name) {
+void Read_json_post(char* file_name) {
     FILE* json_input = fopen(file_name, "r");
     if (!json_input) {
         printf("Error abriendo el archivo JSON\n");
@@ -230,15 +233,15 @@ void leer_json_post(char* file_name) {
 //                  FUNCIONES DE CREACION DE PUBLICACIONES                  //
 
 
-// Función para limpiar el búfer de entrada debido a problemas con el buffer
+// Funcion para limpiar el buer de entrada debido a problemas con el buffer
 //Necesaria para escribir publicaciones (REVISAR)
-void limpiarBuffer() {
+void CleanBuffer() {
     int c;
     while ((c = getchar()) != '\n' && c != EOF);
 }
 
 
-void Realizar_Publicacion(User* user) {
+void Make_Publication(User* user) {
     assert(user);
 
     // Verificar que la lista de publicaciones no sea nula
@@ -247,17 +250,18 @@ void Realizar_Publicacion(User* user) {
     }
 
     if (user->post) {
-        Post nueva_publicacion;
+        Post New_publication;
 
         printf("Ingrese el contenido de la publicacion (max 199 caracteres):\n");
-        limpiarBuffer();
-        fgets(nueva_publicacion.content, sizeof(nueva_publicacion.content), stdin);
-        nueva_publicacion.content[strcspn(nueva_publicacion.content, "\n")] = '\0';
+        fgets(New_publication.content, sizeof(New_publication.content), stdin);
+        CleanBuffer();
+        New_publication.content[strcspn(New_publication.content, "\n")] = '\0';
+        
 
         // Inicializar las otras propiedades del Post
-        nueva_publicacion.likes = 0;
-        nueva_publicacion.shares = 0;
-        nueva_publicacion.num_comments = 0;
+        New_publication.likes = 0;
+        New_publication.shares = 0;
+        New_publication.num_comments = 0;
 
         // Obtener la fecha y hora actual
         time_t tiempo_actual;
@@ -265,18 +269,18 @@ void Realizar_Publicacion(User* user) {
         struct tm* tiempo_desglosado = localtime(&tiempo_actual);
 
         // Formatear la fecha y hora
-        sprintf(nueva_publicacion.date, "%02d/%02d/%04d",
+        sprintf(New_publication.date, "%02d/%02d/%04d",
         tiempo_desglosado->tm_mday, tiempo_desglosado->tm_mon + 1, tiempo_desglosado->tm_year + 1900);
-        sprintf(nueva_publicacion.hour, "%02d:%02d:%02d",
+        sprintf(New_publication.hour, "%02d:%02d:%02d",
         tiempo_desglosado->tm_hour, tiempo_desglosado->tm_min, tiempo_desglosado->tm_sec);
 
-        // Añadir la publicación a la lista de publicaciones del usuario
-        List_Push_back_post(user->post, &nueva_publicacion);
+        // Añadir la publicacion a la lista de publicaciones del usuario
+        List_Push_back_post(user->post, &New_publication);
 
         printf("Publicacion realizada con exito!\n");
-
+        getchar();
         // Creacion del json
-        create_json_user(user);
+        Create_Json_User(user);
 
     } else {
         printf("Error: La lista de publicaciones es nula.\n");
@@ -284,23 +288,23 @@ void Realizar_Publicacion(User* user) {
 }
 
 
-// Función para mostrar las publicaciones de un usuario
-void Mostrar_Publicaciones(User* user) {
+// Funcion para mostrar las publicaciones de un usuario
+void Show_Post(User* user) {
     assert(user);
 
     printf("=== Publicaciones de %s ===\n", user->username);
 
     if (user->post) {
         for (List_Cursor_front(user->post); !List_Cursor_end(user->post); List_Cursor_next(user->post)) {
-            Data data_publicacion = List_Cursor_get(user->post);
-            Post* publicacion = &data_publicacion.post;
+            Data Data_publication = List_Cursor_get(user->post);
+            Post* Publication = &Data_publication.post;
 
-            printf("Fecha: %s\n", publicacion->date);
-            printf("Contenido: %s\n", publicacion->content);
+            printf("Fecha: %s\n", Publication->date);
+            printf("Contenido: %s\n", Publication->content);
 
             char file_name[100];
             sprintf(file_name, "Publicaciones_%s.json", user->username);
-            leer_json_post(file_name);
+            Read_json_post(file_name);
             printf("\n");
         }
     } else {
@@ -314,14 +318,21 @@ void Mostrar_Publicaciones(User* user) {
 
 
 //                 FUNCIONES DE PETICION DE AMISTAD Y ENLACE       //
-//                       REVISAR ADMINISTRACION                  //
-/*
-void SendFriendRequest(User* sender, User* receiver, Graph* grafo) {
+//                       REVISAR ADMINISTRACION                    //
+
+//Funcion para andar solicitudes de amistad
+void Send_FriendRequest(User* sender, User* receiver) {
     if (!sender->pending_friends ) {
         sender->pending_friends = List_New();
     }
+    if (!receiver->pending_friends ) {
+        receiver->pending_friends = List_New();
+    }
     if (!receiver->friend_requests) {
         receiver->friend_requests = List_New();
+    }
+    if (!sender->friend_requests) {
+        sender->friend_requests = List_New();
     }
 
     // Verifica si ya son amigos
@@ -329,28 +340,21 @@ void SendFriendRequest(User* sender, User* receiver, Graph* grafo) {
         printf("Ya son amigos.\n");
         return;
     }
-    if (sender->pending_friends == NULL) {
-        printf("Error: La lista de solicitudes pendientes del remitente es nula.\n");
-        return;
-    }
     // Verifica si ya hay una solicitud pendiente
-    if (List_Find(sender->pending_friends, receiver->graph_index)) {
+    if (List_Find(sender->friend_requests, receiver->graph_index)) {
         printf("Ya has enviado una solicitud de amistad a este usuario.\n");
         return;
     }
 
     // Agrega la solicitud a la lista del remitente y del destinatario
-    List_Push_back(sender->pending_friends, receiver->graph_index, 0.0);
-    List_Push_back(receiver->friend_requests, sender->graph_index, 0.0);
+    List_Push_back(sender->friend_requests, receiver->graph_index, 0.0);
+    List_Push_back(receiver->pending_friends, sender->graph_index, 0.0);
 
     printf("Solicitud de amistad enviada a %s.\n", receiver->username);
 }
 
-
-
-
-// Función para aceptar una solicitud de amistad
-void AcceptFriendRequest(User* receiver, User* sender, Graph* grafo) {
+//Funcion para aceptar solicitudes de amistad
+void Accept_FriendRequest(User* receiver, User* sender, Graph* graph) {
     // Verificar si la solicitud existe
     int requestIndex = List_Find(receiver->pending_friends, sender->graph_index);
 
@@ -358,19 +362,18 @@ void AcceptFriendRequest(User* receiver, User* sender, Graph* grafo) {
         // Eliminar la solicitud de amistad de la lista del receptor
         List_Remove(receiver->pending_friends, requestIndex);
 
-        // Verificar si el remitente también tiene una solicitud pendiente
+        // Verificar si el remitente tambi�n tiene una solicitud pendiente
         int senderRequestIndex = List_Find(sender->friend_requests, receiver->graph_index);
         if (senderRequestIndex != -1) {
             // Eliminar la solicitud de amistad del remitente
             List_Remove(sender->friend_requests, senderRequestIndex);
 
-            // Agregar a ambos usuarios como amigos
-            if (Graph_AddFriendship(grafo, receiver->graph_index, sender->graph_index)) {
+            //Creamos relacion de amistad
+            if (Graph_AddFriendship(graph, receiver->graph_index, sender->graph_index)) {
                 printf("Amistad agregada correctamente.\n");
             } else {
-                printf("Error al agregar la amistad.\n");
-            }
-
+                printf("Error al agregar la amistad: Usuarios no encontrados en el grafo.\n");
+            }           
             printf("Ahora eres amigo de %s.\n", sender->username);
         } else {
             printf("Error: La solicitud de amistad del remitente no fue encontrada.\n");
@@ -380,8 +383,7 @@ void AcceptFriendRequest(User* receiver, User* sender, Graph* grafo) {
     }
 }
 
-
-
+//Funcion para denegar solicitudes
 void DenyFriendRequest(User* receiver, User* sender) {
     // Elimina la solicitud de amistad de la lista del receptor
     List_Remove(receiver->pending_friends, sender->graph_index);
@@ -389,26 +391,26 @@ void DenyFriendRequest(User* receiver, User* sender) {
     printf("Has denegado la solicitud de amistad de %s.\n", sender->username);
 }
 
-void MostrarSolicitudesAmistad(User* user, Graph* grafo) {
+//Funcion de administracion de solicitudes
+void Show_FriendRequest(User* user, Graph* graph) {
     assert(user);
 
     printf("=== Solicitudes de amistad pendientes para %s ===\n", user->username);
 
-    if (!List_Is_empty(user->friend_requests)) {
-        for (List_Cursor_front(user->friend_requests); !List_Cursor_end(user->friend_requests); List_Cursor_next(user->friend_requests)) {
-            Data solicitud = List_Cursor_get(user->friend_requests);
-            int friend_idx = solicitud.index;
+    if (!List_Is_empty(user->pending_friends)) {
+        for (List_Cursor_front(user->pending_friends); !List_Cursor_end(user->pending_friends); List_Cursor_next(user->pending_friends)) {
+            Data Request = List_Cursor_get(user->pending_friends);
+            int friend_idx = Request.index;
 
-            // Utilizar el índice directamente para obtener el nombre del usuario
-            if (friend_idx >= 0 && friend_idx < grafo->len) {
-                printf("Usuario pendiente: %s\n", grafo->users[friend_idx+1].username);
+            if (friend_idx >= 0 && friend_idx < graph->len) {
+                User* friend_user = &graph->users[friend_idx];
+                printf("Usuario pendiente: %s\n", friend_user->username);
             } else {
                 printf("Error: Usuario no encontrado con el índice %d.\n", friend_idx);
             }
         }
-        // Aquí puedes agregar la opción de aceptar o denegar solicitudes
         int choice;
-        printf("1. Aceptar solicitud\n2. Denegar solicitud\n3. Volver\nElija una opción: ");
+        printf("1. Aceptar solicitud\n2. Denegar solicitud\nElija una opci�n: ");
         scanf("%d", &choice);
 
         switch (choice) {
@@ -419,7 +421,7 @@ void MostrarSolicitudesAmistad(User* user, Graph* grafo) {
                 scanf("%s", friend_username);
                 User* friend_user = find_user(friend_username);
                 if (friend_user != NULL) {
-                    AcceptFriendRequest(user, friend_user, grafo);
+                    Accept_FriendRequest(user, friend_user, graph);
                 } else {
                     printf("Usuario no encontrado.\n");
                 }
@@ -436,14 +438,12 @@ void MostrarSolicitudesAmistad(User* user, Graph* grafo) {
                     printf("Usuario no encontrado.\n");
                 }
                 break;
-            case 3:
-                // Volver al menú anterior
-                break;
             default:
-                printf("Opción no válida.\n");
+                printf("Opci�n no v�lida.\n");
         }
-    } else {
+        
+    }
+    else {
         printf("No hay solicitudes de amistad pendientes.\n");
     }
 }
-*/
