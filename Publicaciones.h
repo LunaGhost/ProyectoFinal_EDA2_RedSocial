@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include "List.h"
 
+
 typedef struct User {
     //Para la tabla hash
     char username[50];
@@ -17,8 +18,8 @@ typedef struct User {
     int graph_index;
     List* post;  //Lista de publicaciones del perfil
     List* friends;  //Lista de amigos
-    List* friend_requests;
-    List* pending_friends;
+    List* friend_requests; //Lista de solicitudes enviadas
+    List* pending_friends;  //Lista de solicitudes recibidas
 } User;
 
 
@@ -39,19 +40,24 @@ typedef struct
    eGraphType type;
 } Graph;
 
-
-static int find( User usuarios[], int size, int userid );
+//                  FUNCIONES DEL GRAFO                  //                          
+static int find( User users[], int size, int userid );
 static bool find_neighbor( User* user, int index );
 Graph* Graph_New( int size, eGraphType type );
 void Graph_Delete( Graph** g );
 static void insert( User* user, int index, float weigth );
 void Graph_Print( Graph* g, int depth );
-void Graph_AddUser( Graph* g, int user_id );
 void Insert_User_Graph(char *username, Graph* g);
 bool Graph_AddFriendship( Graph* g, int userstart, int userfinish );
-void limpiarBuffer();
-void Realizar_Publicacion(User* user);
-void Mostrar_Publicaciones(User* user);
-void SendFriendRequest(User* sender, User* receiver, Graph* grafo);
-void AcceptFriendRequest(User* receiver, User* sender, Graph* grafo);
-void MostrarSolicitudesAmistad(User* user, Graph* grafo);
+
+//            FUNCIONES DE PUBLICACIONES / ARCHIVOS           // 
+void Create_Json_User(User* user);
+void Read_json_post(char* file_name);
+void CleanBuffer();
+void Make_Publication(User* user);
+void Show_Post(User* user);
+
+//           FUNCIONES DE SOLICITUDES DE AMISTAD          // 
+void Send_FriendRequest(User* sender, User* receiver);
+void Accept_FriendRequest(User* receiver, User* sender, Graph* grafo);
+void Show_FriendRequest(User* user, Graph* grafo);
