@@ -106,7 +106,7 @@ int verify_password(User *user, char *password) {
 }
 
 //==== FUNCIONES ESTETICAS ====//
-void desplegar_pantalla_carga(){
+void Display_LoadingScreen(){
     // Barra de carga
     char loading[] = "|/-\\";
     int i;
@@ -121,7 +121,7 @@ void desplegar_pantalla_carga(){
     system("sleep 1");
     system("cls");
 
-    printf(" _\n|_) o  _ __    _ __  o  _| _\n|_) | (/_| |\_/(/_| | | (_|(_)");
+    printf(" _\n|_) o  _ __    _ __  o  _| _\n|_) | (/_| |\\_/(/_| | | (_|(_)");
     printf("\n\n             _\n            (_|\n\n");
     printf("nombre red social");
 
@@ -129,17 +129,10 @@ void desplegar_pantalla_carga(){
     system("cls");
 }
 
-void mostrar_menu() {
-    printf("\n===  BIENVENIDO  ===\n");
-    printf("1. Iniciar sesión\n");
-    printf("2. Crear cuenta\n");
-    printf("3. Salir\n");
-    printf("====================\n");
-}
 
 // Función para mostrar el perfil de un usuario
-void mostrar_perfil(User *user) {
-    printf("\n\n===== Perfil de %s =====\n", user->username);
+void Show_Profile(User *user) {
+    printf("\n\n=== Perfil de %s ===\n", user->username);
 }
 
 void chat(User *stored_user) {
@@ -181,7 +174,7 @@ void manejar_opcion_chat(User *stored_user) {
     chat(stored_user);
 }
 
-int iniciar(){
+int Start(){
     char username[50];
     char password[50];
     int choice;
@@ -194,7 +187,7 @@ int iniciar(){
         printf("====================\n");
         printf("Elija una opci�n: ");
         scanf("%d", &choice);
-        limpiarBuffer();
+        CleanBuffer();
         User *stored_user;
         switch (choice) {
             case 1:
@@ -203,24 +196,24 @@ int iniciar(){
                 scanf("%s", username);
                 printf("Contrase�a: ");
                 scanf("%s", password);
-                limpiarBuffer();
+                CleanBuffer();
                 stored_user = find_user(username);
                 if (stored_user != NULL && verify_password(stored_user, password)) {
                     int loggedIn = 1;
                     while (loggedIn) {
                         system("cls");
                         
-                        mostrar_perfil(stored_user);
+                        Show_Profile(stored_user);
                         printf("\n1. Realizar publicación\n2. Ver publicaciones de feed\n3. Ver perfil personal\n");
                         printf("4. Ver solicitudes de amistad\n5. Agregar amigo\n6. Chat\n7. Cerrar sesión\n8. Salir\n");
                         printf("Elija una opción: ");
                         
                         scanf("%d", &choice);
-                        limpiarBuffer();
+                        CleanBuffer();
                         switch (choice) {
                             case 1:
                                 //Publicar
-                                Realizar_Publicacion(stored_user);
+                                Make_Publication(stored_user);
                                 //goto cuenta_abierta;
                                 system("cls");
                                 break;
@@ -232,27 +225,28 @@ int iniciar(){
                                 break;
                             case 3:
                                 //Ver perfil propio
-                                mostrar_perfil(stored_user);
-                                Mostrar_Publicaciones(stored_user);
+                                Show_Profile(stored_user);
+                                Show_Post(stored_user);
                                 //goto cuenta_abierta;
                                 system("cls");
                                 break;
                             case 4:
                                 //Agregar amigo
-                                //MostrarSolicitudesAmistad(stored_user,grafo);
+                                Show_FriendRequest(stored_user,graph);
                                 system("cls");
                                 break;
                             case 5:
-                                /*Se envia solicitud de amistad
+                                //Se envia solicitud de amistad
+                                Graph_Print(graph,0.0);
                                 printf("Ingrese el nombre de usuario al que desea enviar una solicitud de amistad: ");
                                 char friend_username[50];
                                 scanf("%s", friend_username);
                                 User* friend_user = find_user(friend_username);
                                 if (friend_user != NULL) {
-                                    SendFriendRequest(stored_user, friend_user, grafo);
+                                    Send_FriendRequest(stored_user, friend_user);
                                 } else {
                                     printf("Usuario no encontrado.\n");
-                                }*/
+                                }
                                 system("cls");
                                 break;
                             case 6:
@@ -285,7 +279,7 @@ int iniciar(){
                 scanf("%s", password);
 
                 if (find_user(username) == NULL) {
-                    insert_user(username, password, grafo);
+                    insert_user(username, password, graph);
                     printf("Cuenta creada con Éxito para %s.\n", username);
                     printf("Vuelva a iniciar sesion para terminar");
                 } else {
@@ -305,11 +299,11 @@ int iniciar(){
 //==== MAIN ====//
 int main() {
     setlocale(LC_ALL, ""); // Configura la localización para soporte de caracteres especiales
-    //desplegar_pantalla_carga();
+    //Display_LoadingScreen();
 
-    grafo = Graph_New(TABLE_SIZE, eGraphType_UNDIRECTED);
-    iniciar();
-    Graph_Delete(&grafo);
+    graph = Graph_New(TABLE_SIZE, eGraphType_UNDIRECTED);
+    Start();
+    Graph_Delete(&graph);
 
     return 0;
 }
