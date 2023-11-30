@@ -1,7 +1,10 @@
+#include <stdlib.h>
+#include <stdbool.h>
+#include <assert.h>
 
 #include "List.h"
 
-static Node* new_node( int index, float weight )
+Node* new_node( int index, float weight )
 {
    Node* n = (Node*) malloc( sizeof( Node ) );
    if( n != NULL )
@@ -16,7 +19,7 @@ static Node* new_node( int index, float weight )
    return n;
 }
 
-static Node* new_node_post(Post* post) {
+Node* new_node_post(Post* post) {
    Node* n = (Node*)malloc(sizeof(Node));
    if (n != NULL) {
       n->data.post = *post;

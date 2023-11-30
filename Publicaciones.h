@@ -1,63 +1,74 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <locale.h> // Incluye la biblioteca para soporte de caracteres especiales
-#include <assert.h>
-#include <stdbool.h>
-#include <stdint.h>
+// Publicaciones.h
+#ifndef PUBLICACIONES_H
+#define PUBLICACIONES_H
+
 #include "List.h"
 
+#define MAX_MESSAGES 100
+#define MAX_MESSAGE_LENGTH 256
+#define MAX_USERNAME_LENGTH 30
 
-typedef struct User {
-    //Para la tabla hash
+#define TABLE_SIZE 100
+
+typedef struct {
     char username[50];
-    char password_hash[64]; // Hash de contrase�a (SHA-256)
+    char password_hash[64];
     struct User* next;
-
-    //Para el grafo
     int graph_index;
-    List* post;  //Lista de publicaciones del perfil
-    List* friends;  //Lista de amigos
-    List* friend_requests; //Lista de solicitudes enviadas
-    List* pending_friends;  //Lista de solicitudes recibidas
+    List* post;
+    List* friends;
+    List* friend_requests;
+    List* pending_friends;
 } User;
 
-
-//SOLOU SAREMOS GRAFO NO DIRIGINO PERO MANTENEMOS ESTRUCTURA
-//De ambos tipos
 typedef enum
 {
    eGraphType_UNDIRECTED,
    eGraphType_DIRECTED
 } eGraphType;
 
-typedef struct
-{
-   User* users;
-   int size;
-   int len;
-
-   eGraphType type;
+typedef struct {
+    User* users;
+    int size;
+    int len;
+    eGraphType type;
 } Graph;
 
-//                  FUNCIONES DEL GRAFO                  //                          
-static int find( User users[], int size, int userid );
-static bool find_neighbor( User* user, int index );
-Graph* Graph_New( int size, eGraphType type );
-void Graph_Delete( Graph** g );
-static void insert( User* user, int index, float weigth );
-void Graph_Print( Graph* g, int depth );
-void Insert_User_Graph(char *username, Graph* g);
-bool Graph_AddFriendship( Graph* g, int userstart, int userfinish );
+typedef struct MessageChat {
+    char usuario[MAX_USERNAME_LENGTH];
+    char mensaje[MAX_MESSAGE_LENGTH];
+} MessageChat;
 
-//            FUNCIONES DE PUBLICACIONES / ARCHIVOS           // 
+typedef struct HistorialChat {
+    MessageChat messages[MAX_MESSAGES];
+    int count;
+} HistorialChat;
+
+User* find_user(char* username);
+
+Graph* Graph_New(int size, eGraphType type);
+void Graph_Delete(Graph** g);
+void Insert_User_Graph(char* username, Graph* g);
+bool Graph_AddFriendship(Graph* g, int userstart, int userfinish);
+void Graph_Print(Graph* g, int depth);
 void Create_Json_User(User* user);
 void Read_json_post(char* file_name);
 void CleanBuffer();
 void Make_Publication(User* user);
 void Show_Post(User* user);
-
-//           FUNCIONES DE SOLICITUDES DE AMISTAD          // 
 void Send_FriendRequest(User* sender, User* receiver);
 void Accept_FriendRequest(User* receiver, User* sender, Graph* grafo);
 void Show_FriendRequest(User* user, Graph* grafo);
+void chat(User* stored_user, User* destinatary_user, Graph* graph, HistorialChat* historial);
+void Show_Profile(User* user);
+void Display_LoadingScreen();
+int verify_password(User* user, char* password);
+int hash(char* str);
+void addMessage(HistorialChat* historial, const char* usuario, const char* mensaje);
+void printHistorial(HistorialChat* historial);
+void DenyFriendRequest(User* receiver, User* sender);
+void Accept_FriendRequest(User* receiver, User* sender, Graph* graph);
+void handle_option_chat(User* stored_user, User* destinatary_user, Graph* grafo);
+int Start();
+
+#endif // PUBLICACIONES_H
