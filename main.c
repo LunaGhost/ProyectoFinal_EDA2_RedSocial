@@ -22,7 +22,7 @@
 #endif
 
 //==== MAIN ====//
-int WinMain() {
+int main() {
     setlocale(LC_ALL, ""); // Configura la localización para soporte de caracteres especiales
     //Display_LoadingScreen();
 
