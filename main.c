@@ -25,24 +25,23 @@
 
 
 //== ESTRUCTURAS ==//
-
-typedef struct MensajesChat {
+typedef struct MessageChat {
     char usuario[MAX_USERNAME_LENGTH];
     char mensaje[MAX_MESSAGE_LENGTH];
-} MensajesChat;
+} MessageChat;
 
 typedef struct HistorialChat {
-    MensajesChat messages[MAX_MESSAGES];
+    MessageChat messages[MAX_MESSAGES];
     int count;
 } HistorialChat;
 
-void ImprimirHistorial(HistorialChat *historial ) {
+void printHistorial(HistorialChat *historial ) {
     for (int i = 0; i < historial ->count; i++) {
         printf("%s: %s\n", historial ->messages[i].usuario, historial ->messages[i].mensaje);
     }
 }
 
-void anadirMensaje(HistorialChat *historial , const char *usuario, const char *mensaje) {
+void addMessage(HistorialChat *historial , const char *usuario, const char *mensaje) {
     if (historial ->count < MAX_MESSAGES) {
         strcpy(historial ->messages[historial ->count].usuario, usuario);
         strcpy(historial ->messages[historial ->count].mensaje, mensaje);
@@ -57,7 +56,7 @@ void anadirMensaje(HistorialChat *historial , const char *usuario, const char *m
 #define TABLE_SIZE 100
 User* hashTable[TABLE_SIZE];
 
-Graph* grafo;
+Graph* graph;
 
 //==== FUNCIONES LOGICAS ====//
 
@@ -72,7 +71,7 @@ int hash(char *str) {
 }
 
 // Función para agregar un usuario a la tabla hash
-void insert_user(char *username, char *password, Graph* g) {
+void insert_user(char *username, char *password, Graph* graph) {
     int index = hash(username);
     User* new_user = (User*)malloc(sizeof(User));
     if (new_user == NULL) {
@@ -83,7 +82,7 @@ void insert_user(char *username, char *password, Graph* g) {
     strncpy(new_user->password_hash, password, sizeof(new_user->password_hash));
     new_user->next = hashTable[index];
     hashTable[index] = new_user;
-    Insert_User_Graph(username, g);
+    Insert_User_Graph(username, graph);
 }
 
 // Función para buscar un usuario en la tabla hash y devolver un puntero al usuario encontrado
@@ -135,18 +134,21 @@ void Show_Profile(User *user) {
     printf("\n\n=== Perfil de %s ===\n", user->username);
 }
 
-void chat(User *stored_user) {
-    HistorialChat historial;
-    historial.count = 0;
+void chat(User *stored_user, User* destinatary_user, Graph* graph, HistorialChat *historial) {
+    char destinatary[MAX_USERNAME_LENGTH];
 
-    char usuario[MAX_USERNAME_LENGTH];
-
-    printf("Introduce tu usuario: ");
+    printf("Introduce el nombre de usuario al que deseas enviar un mensaje: ");
     getchar(); // Limpiar búfer del teclado
-    fgets(usuario, MAX_USERNAME_LENGTH, stdin);
-    usuario[strcspn(usuario, "\n")] = '\0'; // Eliminar el carácter de nueva línea
+    fgets(destinatary, MAX_USERNAME_LENGTH, stdin);
+   destinatary[strcspn(destinatary, "\n")] = '\0'; // Eliminar el carácter de nueva línea
 
-    printf("Bienvenido al chat, %s!\n", usuario);
+   destinatary_user = find_user(destinatary);
+    if (destinatary_user == NULL) {
+        printf("Usuario no encontrado.\n");
+        return;
+    }
+
+    printf("Bienvenido al chat con %s, %s!\n", destinatary, stored_user->username);
 
     while (1) {
         char mensaje[MAX_MESSAGE_LENGTH];
@@ -159,19 +161,21 @@ void chat(User *stored_user) {
             break;
         }
 
-        anadirMensaje(&historial, usuario, mensaje);
+        addMessage(historial, stored_user->username, mensaje);
 
-        printf("\nHistorial de Chat:\n");
-        ImprimirHistorial(&historial);
+        printf("\nHistorial de Chat con %s:\n", destinatary);
+       printHistorial(historial);
         printf("\n");
     }
 
-    printf("Saliendo del Chat. Adiós, %s!\n", usuario);
+    printf("Saliendo del Chat con %s. Adiós, %s!\n", destinatary, stored_user->username);
 }
 
 // Función para manejar la opción de chat
-void manejar_opcion_chat(User *stored_user) {
-    chat(stored_user);
+void handle_option_chat(User *stored_user, User* destinatary_user, Graph* grafo) {
+    HistorialChat historial;
+    historial.count = 0;
+    chat(stored_user, destinatary_user, grafo, &historial);
 }
 
 int Start(){
@@ -251,7 +255,16 @@ int Start(){
                                 break;
                             case 6:
                                 //Chat
-                                manejar_opcion_chat(stored_user);
+                                printf("Introduce el nombre de usuario con el que deseas chatear: ");
+                                char chat_username[50];
+                                scanf("%s", chat_username);
+                                fflush(stdin);
+                                User* chat_user = find_user(chat_username);
+                                if (chat_user != NULL) {
+                                    handle_option_chat(stored_user, chat_user, graph);
+                                } else {
+                                    printf("Usuario no encontrado.\n");
+                                }
                                 system("cls");
                                 break;
                             case 7:
